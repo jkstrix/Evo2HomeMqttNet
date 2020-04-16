@@ -26,3 +26,6 @@ Requires an Mqtt Server to point to and Home Assistant for automatic discovery t
 * "disableMqtt": "true" or "false". Will turn off mqtt including setting home assistant discovery,
 * "mqqtDiscovery": "true" or "false". If set to true will publish discovery in home assistant to automatically configure heating zones
 * "mqqtDiscoveryPrefix": Should be set to "homeassistant" to work correctly.
+
+## Docker - Details can be found at:
+https://hub.docker.com/r/jkstrix/evo2homemqttnet
