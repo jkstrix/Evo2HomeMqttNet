@@ -34,7 +34,7 @@ https://hub.docker.com/r/jkstrix/evo2homemqttnet
 
 MIT License
 
-Evo2HomeMqttNet Copyright (c) 2019 James Knight
+Evo2HomeMqttNet Copyright (c) 2020 James Knight
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
