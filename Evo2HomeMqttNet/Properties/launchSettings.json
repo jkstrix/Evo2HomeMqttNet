@@ -1,0 +1,23 @@
+{
+  "profiles": {
+    "Evo2Mqtt": {
+      "commandName": "Project",
+        "environmentVariables": {
+            "mqttUser": "",
+            "evoFileLocation": "",
+            "evoPassword": "",
+            "evoLocationName": "",
+            "evoUsername": "",
+            "mqttPrefix": "",
+            "mqttPassword": "",
+            "evoPollDuration": "180",
+            "mqttConnection": "",
+            "mqttPort": "1883",
+            "mqttClientName": "Evo2MqttNet",
+            "disableMqtt": "false",
+            "mqqtDiscovery": "true",
+            "mqqtDiscoveryPrefix": "homeassistant"
+        }
+    }
+  }
+}
