@@ -12,7 +12,7 @@
             "mqttPassword": "",
             "evoPollDuration": "180",
             "mqttConnection": "",
-            "mqttPort": "1883",
+            "mqttPort": "9001",
             "mqttClientName": "Evo2MqttNet",
             "disableMqtt": "false",
             "mqqtDiscovery": "true",
