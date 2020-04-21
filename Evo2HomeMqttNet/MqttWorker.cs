@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace Evo2HomeMqttNet
 {
-    public class MqttWorker
+    public class MqttWorker : IDisposable
     {
         private readonly EvoHomeSettings _settings;
         private readonly ILogger<MqttWorker> _logger;
@@ -34,7 +34,7 @@ namespace Evo2HomeMqttNet
             var options = new MqttClientOptionsBuilder()
                 .WithClientId(evoHomeSettings.MqttClientName)
                 .WithCredentials(evoHomeSettings.MqttUser, evoHomeSettings.MqttPassword)
-                .WithTcpServer(evoHomeSettings.MqttConnection, evoHomeSettings.MqttPort)
+                .WithWebSocketServer($"{evoHomeSettings.MqttConnection}:{evoHomeSettings.MqttPort}")
                 .Build();
 
             _managedOptions = new ManagedMqttClientOptionsBuilder()
@@ -55,7 +55,10 @@ namespace Evo2HomeMqttNet
                 _mqttClient.UseConnectedHandler(e => { _logger.LogInformation("Connected to Mqtt Broker"); });
                 _mqttClient.UseDisconnectedHandler(e =>
                 {
-                    _logger.LogWarning("Disconnected from Mqtt Broker", e);
+                    if (e.Exception != null)
+                    {
+                        _logger.LogWarning("Disconnected from Mqtt Broker", e.Exception);
+                    }
                 });
 
                 _mqttClient.UseApplicationMessageReceivedHandler(async e =>
@@ -111,6 +114,12 @@ namespace Evo2HomeMqttNet
             var disco = new DiscoveryObject(zoneName, zoneId, _settings.MqttPrefix, manufacturer, model, version);
 
             await Publish(topic, JsonConvert.SerializeObject(disco));
+        }
+
+        public void Dispose()
+        {
+            _mqttClient.StopAsync().GetAwaiter().GetResult();
+            _mqttClient?.Dispose();
         }
     }
 }

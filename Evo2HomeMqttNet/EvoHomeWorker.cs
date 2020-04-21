@@ -15,7 +15,7 @@ using Zone = Evo2HomeMqttNet.Models.Status.Zone;
 
 namespace Evo2HomeMqttNet
 {
-    public class EvoHomeWorker
+    public class EvoHomeWorker : IDisposable
     {
         private readonly EvoHomeSettings _evoHomeSettings;
         private readonly ILogger<EvoHomeWorker> _logger;
@@ -288,6 +288,11 @@ namespace Evo2HomeMqttNet
                 _logger.LogError($"Failed to get value from TTC {typeof(T).FullName}", exception);
                 throw;
             }
+        }
+
+        public void Dispose()
+        {
+            Timer?.Dispose();
         }
     }
 }

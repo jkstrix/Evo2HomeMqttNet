@@ -26,6 +26,8 @@ namespace Evo2HomeMqttNet
         private const string Evofilelocation = "evoFileLocation";
         private const string ApiLocation = "https://tccna.honeywell.com/WebAPI/";
         private const string HoneyWellRoot = "https://tccna.honeywell.com/";
+        
+        private static IServiceScope currentScope;
 
         private static void Main(string[] args)
         {
@@ -35,10 +37,24 @@ namespace Evo2HomeMqttNet
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             var log = serviceProvider.GetService<ILogger<Program>>();
-            var service = serviceProvider.GetService<EvoHomeWorker>();
-            log.LogInformation("Starting Application");
 
-            service.Start().GetAwaiter().GetResult();
+            var timer = new Timer((s) =>
+            {
+                if (currentScope != null)
+                {
+                    log.LogInformation("Stopping Worker After 24 Hours");
+                    currentScope?.Dispose();
+                    currentScope = null;
+                    GC.Collect();
+                }
+
+                log.LogInformation("Starting Worker");
+                currentScope = serviceProvider.CreateScope();
+                var worker = currentScope.ServiceProvider.GetService<EvoHomeWorker>();
+                worker.Start().GetAwaiter().GetResult();
+
+            }, serviceProvider,  TimeSpan.Zero, TimeSpan.FromHours(24));
+
 
             Thread.Sleep(Timeout.Infinite);
         }
@@ -80,8 +96,8 @@ namespace Evo2HomeMqttNet
 
             services.AddSingleton<Store>();
             services.AddSingleton<TokenManager>();
-            services.AddSingleton<EvoHomeWorker>();
-            services.AddSingleton<MqttWorker>();
+            services.AddScoped<EvoHomeWorker>();
+            services.AddScoped<MqttWorker>();
         }
 
         private static EvoHomeSettings GetSettings()
