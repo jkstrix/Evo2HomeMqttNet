@@ -21,7 +21,7 @@ Requires an Mqtt Server to point to and Home Assistant for automatic discovery t
 * "mqttUser": Mqtt server username,
 * "mqttPassword": Mqtt server password,
 * "mqttConnection": Ip address of the Mqtt service,
-* "mqttPort": Mqtt Port (Usually "1883"),
+* "mqttPort": Mqtt Port (Usually "9001" as this uses websockets),
 * "mqttClientName": Client name used when connecting to the Mqtt Service eg. "Evo2MqttNet",
 * "disableMqtt": "true" or "false". Will turn off mqtt including setting home assistant discovery,
 * "mqqtDiscovery": "true" or "false". If set to true will publish discovery in home assistant to automatically configure heating zones
