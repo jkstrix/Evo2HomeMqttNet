@@ -24,8 +24,9 @@ Requires an Mqtt Server to point to and Home Assistant for automatic discovery t
 * "mqttPort": Mqtt Port (Usually "9001" as this uses websockets),
 * "mqttClientName": Client name used when connecting to the Mqtt Service eg. "Evo2MqttNet",
 * "disableMqtt": "true" or "false". Will turn off mqtt including setting home assistant discovery,
-* "mqqtDiscovery": "true" or "false". If set to true will publish discovery in home assistant to automatically configure heating zones
-* "mqqtDiscoveryPrefix": Should be set to "homeassistant" to work correctly.
+* "mqttDiscovery": "true" or "false". If set to true will publish discovery in home assistant to automatically configure heating zones
+* "mqttDiscoveryPrefix": Should be set to "homeassistant" to work correctly.
+* "mqttWebSockets": "true" or "false", will use websocket connection
 
 ## Docker - Details can be found at:
 https://hub.docker.com/r/jkstrix/evo2homemqttnet

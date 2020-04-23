@@ -27,15 +27,22 @@ namespace Evo2HomeMqttNet
 
             if (evoHomeSettings.DisableMqtt)
             {
-                _logger.LogInformation("Mqqt Disabled");
+                _logger.LogInformation("Mqtt Disabled");
                 return;
             }
 
-            var options = new MqttClientOptionsBuilder()
-                .WithClientId(evoHomeSettings.MqttClientName)
-                .WithCredentials(evoHomeSettings.MqttUser, evoHomeSettings.MqttPassword)
-                .WithWebSocketServer($"{evoHomeSettings.MqttConnection}:{evoHomeSettings.MqttPort}")
-                .Build();
+            var builder = new MqttClientOptionsBuilder()
+                .WithClientId(evoHomeSettings.MqttClientName);
+
+            if (!string.IsNullOrWhiteSpace(evoHomeSettings.MqttUser))
+                builder.WithCredentials(evoHomeSettings.MqttUser, evoHomeSettings.MqttPassword);
+
+            if (evoHomeSettings.MqttWebSockets)
+                builder.WithWebSocketServer($"{evoHomeSettings.MqttConnection}:{evoHomeSettings.MqttPort}");
+            else
+                builder.WithTcpServer(evoHomeSettings.MqttConnection, evoHomeSettings.MqttPort);
+
+            var options = builder.Build();
 
             _managedOptions = new ManagedMqttClientOptionsBuilder()
                 .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
@@ -55,10 +62,7 @@ namespace Evo2HomeMqttNet
                 _mqttClient.UseConnectedHandler(e => { _logger.LogInformation("Connected to Mqtt Broker"); });
                 _mqttClient.UseDisconnectedHandler(e =>
                 {
-                    if (e.Exception != null)
-                    {
-                        _logger.LogWarning("Disconnected from Mqtt Broker", e.Exception);
-                    }
+                    if (e.Exception != null) _logger.LogWarning("Disconnected from Mqtt Broker", e.Exception);
                 });
 
                 _mqttClient.UseApplicationMessageReceivedHandler(async e =>
@@ -79,7 +83,6 @@ namespace Evo2HomeMqttNet
                     }
                 });
                 await _mqttClient.StartAsync(_managedOptions);
-                
             }
             catch (Exception e)
             {
@@ -101,7 +104,6 @@ namespace Evo2HomeMqttNet
 
         public async Task SubscribeToTopicAsync(string topic)
         {
-            
             _logger.LogDebug($"Subscribing to topic {topic}");
             await _mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic(topic)
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce).Build());
@@ -110,7 +112,7 @@ namespace Evo2HomeMqttNet
         public async Task PublishDiscoveryConfig(string zoneName, string zoneId, string manufacturer, string model,
             string version)
         {
-            var topic = $"{_settings.MqqtDiscoveryPrefix}/climate/{zoneId}/config";
+            var topic = $"{_settings.MqttDiscoveryPrefix}/climate/{zoneId}/config";
             var disco = new DiscoveryObject(zoneName, zoneId, _settings.MqttPrefix, manufacturer, model, version);
 
             await Publish(topic, JsonConvert.SerializeObject(disco));

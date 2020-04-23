@@ -83,8 +83,8 @@ namespace Evo2HomeMqttNet
                     await _mqttWorker.SubscribeToTopicAsync(
                         $"{_evoHomeSettings.MqttPrefix}/climate/{zone.ZoneId}/set/+");
 
-                    if (_evoHomeSettings.MqqtDiscovery &&
-                        string.IsNullOrWhiteSpace(_evoHomeSettings.MqqtDiscoveryPrefix) == false)
+                    if (_evoHomeSettings.MqttDiscovery &&
+                        string.IsNullOrWhiteSpace(_evoHomeSettings.MqttDiscoveryPrefix) == false)
                     {
                         if (!_configuredDevices.ZoneIds.Contains(zone.ZoneId))
                         {    

@@ -21,12 +21,13 @@ namespace Evo2HomeMqttNet
         private const string Mqttclientname = "mqttClientName";
         private const string Mqttport = "mqttPort";
         private const string Disablemqtt = "disableMqtt";
-        private const string Mqqtdiscovery = "mqqtDiscovery";
-        private const string Mqqtdiscoveryprefix = "mqqtDiscoveryPrefix";
+        private const string Mqttdiscovery = "mqttDiscovery";
+        private const string Mqttdiscoveryprefix = "mqttDiscoveryPrefix";
         private const string Evofilelocation = "evoFileLocation";
         private const string ApiLocation = "https://tccna.honeywell.com/WebAPI/";
         private const string HoneyWellRoot = "https://tccna.honeywell.com/";
-        
+        private const string Mqttwebsockets = "mqttWebSockets";
+
         private static IServiceScope currentScope;
 
         private static void Main(string[] args)
@@ -121,11 +122,13 @@ namespace Evo2HomeMqttNet
                     : Constants.DefaultMqttPort,
                 DisableMqtt = bool.TryParse(Environment.GetEnvironmentVariable(Disablemqtt), out var disableMqtt) &&
                               disableMqtt,
-                MqqtDiscovery =
-                    bool.TryParse(Environment.GetEnvironmentVariable(Mqqtdiscovery), out var mqqtDiscovery) &&
-                    mqqtDiscovery,
-                MqqtDiscoveryPrefix = Environment.GetEnvironmentVariable(Mqqtdiscoveryprefix),
-                FileLocation = Environment.GetEnvironmentVariable(Evofilelocation)
+                MqttDiscovery =
+                    bool.TryParse(Environment.GetEnvironmentVariable(Mqttdiscovery), out var mqttDiscovery) &&
+                    mqttDiscovery,
+                MqttDiscoveryPrefix = Environment.GetEnvironmentVariable(Mqttdiscoveryprefix),
+                FileLocation = Environment.GetEnvironmentVariable(Evofilelocation),
+                MqttWebSockets = bool.TryParse(Environment.GetEnvironmentVariable(Mqttwebsockets), out var mqttSockets) &&
+                                 mqttSockets
             };
         }
     }

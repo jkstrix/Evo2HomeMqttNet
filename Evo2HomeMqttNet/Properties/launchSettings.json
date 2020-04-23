@@ -15,8 +15,9 @@
             "mqttPort": "9001",
             "mqttClientName": "Evo2MqttNet",
             "disableMqtt": "false",
-            "mqqtDiscovery": "true",
-            "mqqtDiscoveryPrefix": "homeassistant"
+            "mqttDiscovery": "true",
+            "mqttDiscoveryPrefix": "homeassistant",
+            "mqttWebSockets" :  false 
         }
     }
   }
