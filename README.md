@@ -14,7 +14,7 @@ Requires an Mqtt Server to point to and Home Assistant for automatic discovery t
 
 * "evoFileLocation": Location of output files and cache (required)
 * "evoUsername": Evohome username
-* "evoPassword": Evohome passowrd,
+* "evoPassword": Evohome password,
 * "evoLocationName": Evo home location name "Home" for example,
 * "evoPollDuration": Poll duration is seconds, I recommend setting this to 180,
 * "mqttPrefix": The mqtt topic prefix "evohome" for example,
