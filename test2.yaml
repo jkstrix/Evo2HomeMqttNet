@@ -1,0 +1,107 @@
+blueprint:
+  name: ZHA Events
+  description: Detects ZHA button click events and sequences (single click, double click and long click)
+  domain: automation
+  input:
+    clicks_sequence:
+      name: Click sequence
+      description: >
+        List of click types for sequence detection (separated with ','). e.g: "single, single, double, long".
+        Possible values are:
+          - single, for a single click.
+          - double, for double click.
+          - long, for a long click.
+    device_ieee:
+      name: Device IEEE
+      description: Device IEEE identifier      
+    timeout:
+      name: Clicks timeout
+      description: Max timeout between clicks
+      selector:
+        number:
+          min: 100
+          max: 5000
+          unit_of_measurement: milliseconds
+          step: 50
+          mode: slider
+      default: 2000
+    conditions:
+      name: Conditions
+      description: >-
+        Additional conditions for event triggering (with 'condition template' syntax.
+        e.g. "{{ states('alarm_control_panel.shield') == 'armed_away' }}"
+      default: []
+    actions:
+      name: Actions
+      description: Notifications or similar to be run when the click sequence was detected.
+      selector:
+        action: {}
+
+trigger_variables:  
+  clicks_sequence_str: !input 'clicks_sequence'
+  clicks_sequence: >-
+    {% set clicks_sequence = namespace(data=[]) %}
+    {% for click in clicks_sequence_str.split(',') %}
+      {% set clicks_sequence.data = clicks_sequence.data + [click.replace(' ', '')] %}
+    {% endfor %}
+    {{ clicks_sequence.data }}
+
+trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_ieee: !input 'device_ieee'
+      command: >-
+        {% if  clicks_sequence[0] == 'long' %}
+          hold
+        {% else %}
+          click
+        {% endif %}
+      args: >-
+        {% set args = namespace(data = []) %}
+        {% if clicks_sequence[0] != 'long' %}
+          {% set args.data = {"click_type": clicks_sequence[0]} %}
+        {% endif %}
+        {{ args.data }}
+
+condition: !input 'conditions'
+
+action:
+  - choose:
+      - alias: Not sequence (only one)
+        conditions: "{{ clicks_sequence|length == 1 }}"
+        sequence: !input 'actions'
+
+    default:
+      - repeat:
+          sequence:
+            - wait_for_trigger:
+                - platform: event
+                  event_type: zha_event
+                  event_data:
+                    device_ieee: !input 'device_ieee'
+                    command: >-
+                      {% if  clicks_sequence[repeat.index] == 'long' %}
+                        hold
+                      {% else %}
+                        click
+                      {% endif %}
+                    args: >-
+                      {% set args = namespace(data = []) %}
+                      {% if clicks_sequence[repeat.index] != 'long' %}
+                        {% set args.data = {"click_type": clicks_sequence[repeat.index]} %}
+                      {% endif %}
+                      {{ args.data }}
+              timeout:
+                milliseconds: !input 'timeout'
+              continue_on_timeout: false
+
+            - choose:
+                - alias: Unsuccessful code
+                  conditions: "{{ wait.trigger is not none and repeat.index == (clicks_sequence|length|int - 1) }}"
+                  sequence: !input 'actions'
+                
+          until: "{{ repeat.index == (clicks_sequence|length|int - 1) or wait.trigger is none }}"
+
+mode: single
+max_exceeded: silent
