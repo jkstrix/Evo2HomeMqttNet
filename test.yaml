@@ -1,0 +1,145 @@
+blueprint:
+  name: MQTT - Philips Hue Dimmer
+  description: 'Control lights with a Philips Hue Dimmer Switch.
+
+
+    The top "on" button will turn the lights on to the last set brightness.
+
+
+    Dim up/down buttons will change the brightness using predefined step and can be
+    pressed and hold until the brightness is satisfactory.
+
+
+    The bottom "off" button will turn the lights off.
+
+
+    Long Off or On press will set brightness to the maximum or to the minimum. '
+  domain: automation
+  input:
+    dimmer:
+      name: Philips Hue dimmer action sensor
+      description:
+        'This must be an "action" sensor provided by zigbee2mqtt. For example
+        "sensors.living_dimmer_action" '
+      selector:
+        entity:
+          domain: sensor
+    light:
+      name: Target light
+      selector:
+        entity:
+          domain: light
+    step:
+      name: Dimming step in percent
+      default: 25
+      selector:
+        number:
+          min: 0.0
+          max: 50.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: "%"
+    default_brightness:
+      name: Default brightness level
+      description: Set this brightness level for switching on from off state
+      default: 80
+      selector:
+        number:
+          min: 1.0
+          max: 100.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: "%"
+    lowest_brightness:
+      name: Lowest brightness level
+      description: Set this brightness level on long "Off" button press
+      default: 3
+      selector:
+        number:
+          min: 1.0
+          max: 50.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: "%"
+    color_tmp:
+      name: Color temp (in Mired)
+      default: 320
+      selector:
+        number:
+          min: 150.0
+          max: 500.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: "Mired"
+    trans-on:
+      name: transition for switching on as well as dimming
+      default: 0
+      selector:
+        number:
+          min: 0.0
+          max: 5.0
+          mode: slider
+          step: 0.5
+          unit_of_measurement: "s"
+    trans-off:
+      name: transition for switching off
+      default: 1
+      selector:
+        number:
+          min: 0.0
+          max: 5.0
+          mode: slider
+          step: 0.5
+          unit_of_measurement: "s"
+  source_url: https://community.home-assistant.io/t/mqtt-philips-hue-dimmer/257551
+trigger:
+  platform: state
+  entity_id: !input "dimmer"
+action:
+  - variables:
+      command: "{{ trigger.to_state.attributes.action }}"
+      step: !input "step"
+      negative_step: "{{ -1 * (step | int) }}"
+  - choose:
+      - conditions: "{{ command == 'on-press' }}"
+        sequence:
+          - service: light.turn_on
+            data_template:
+              entity_id: !input "light"
+              transition: !input "trans-on"
+              color_temp: !input "color_tmp"
+              brightness_pct: !input default_brightness
+      - conditions: "{{ command == 'off-press' }}"
+        sequence:
+          - service: light.turn_off
+            data_template:
+              entity_id: !input "light"
+              transition: !input "trans-off"
+      - conditions: "{{ command == 'down-press' or command == 'down-hold' }}"
+        sequence:
+          - service: light.turn_on
+            data_template:
+              entity_id: !input "light"
+              brightness_step_pct: "{{ negative_step }}"
+              transition: !input "trans-on"
+      - conditions: "{{ command == 'up-press' or command == 'up-hold' }}"
+        sequence:
+          - service: light.turn_on
+            data_template:
+              entity_id: !input "light"
+              brightness_step_pct: "{{ step }}"
+              transition: !input "trans-on"
+      - conditions: "{{ command == 'on-hold' }}"
+        sequence:
+          - service: light.turn_on
+            data_template:
+              entity_id: !input "light"
+              brightness: 255
+              transition: !input "trans-on"
+      - conditions: "{{ command == 'off-hold' }}"
+        sequence:
+          - service: light.turn_on
+            data_template:
+              entity_id: !input "light"
+              brightness_pct: !input "lowest_brightness"
+              transition: !input "trans-on"
